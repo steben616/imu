@@ -1,5 +1,5 @@
-#ifndef MAG_H
-#define MAG_H
+#ifndef HMC5883L_H
+#define HMC5883L_H
 
 #include <map>
 #include <cmath>
@@ -17,7 +17,7 @@ constexpr uint8_t HMC5883L_CONFIG_REG_B = 0x01;
 constexpr uint8_t DATA_OUTPUT_X_MSB_REG = 0x03;
 constexpr uint8_t HMC5883L_CONFIG_REG_MODE = 0x02;
 
-struct hmc5883L {
+struct HMC5883L {
 
     double x_bias = -19.725;
     double y_bias = -6.375;
@@ -41,7 +41,7 @@ struct hmc5883L {
             {8.1,  {7 << 5, 4.35}}
         };
 
-    hmc5883L(int sda, int scl, uint freq = 100*1000, double gain = 1.9) {
+    HMC5883L(int sda, int scl, uint freq = 400*1000, double gain = 1.9) {
         i2c_init(i2c0, freq);
         gpio_set_function(sda, GPIO_FUNC_I2C);
         gpio_set_function(scl, GPIO_FUNC_I2C);
