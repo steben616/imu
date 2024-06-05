@@ -56,7 +56,7 @@ struct HMC5883L {
         sleep_ms(12);
     }
 
-    auto readRaw() {
+    auto readMagRaw() {
         uint8_t buf[6];
         i2c_write_blocking(i2c0, HMC5883L_ADDR, &DATA_OUTPUT_X_MSB_REG, 1, true);
         i2c_read_blocking(i2c0, HMC5883L_ADDR, buf, 6, false);
@@ -73,8 +73,8 @@ struct HMC5883L {
         return std::make_tuple(x, y, z);
     }
 
-    auto readMagnetometerData() {
-        auto [x_raw, y_raw, z_raw] = readRaw();
+    auto readMagnetometer() {
+        auto [x_raw, y_raw, z_raw] = readMagRaw();
         auto x = (x_raw * x_scale) + x_bias;
         auto y = (y_raw * y_scale) + y_bias;
         auto z = (z_raw * z_scale) + z_bias;
@@ -82,7 +82,7 @@ struct HMC5883L {
     }
 
     auto getHeading() {
-        auto [x, y, z] = readMagnetometerData();
+        auto [x, y, z] = readMagnetometer();
         auto heading = std::atan2(y, x);
         heading += _decl;
         if (heading < 0) {
@@ -101,7 +101,7 @@ struct HMC5883L {
         max_x = max_y = max_z = -32767;
         printf("x,y,z\n");
         for (int i = 0; i < count; i++) {
-            auto [x, y, z] = readRaw();
+            auto [x, y, z] = readMagRaw();
             min_x = std::min(min_x, x);
             min_y = std::min(min_y, y);
             min_z = std::min(min_z, z);
@@ -125,7 +125,15 @@ struct HMC5883L {
         x_scale = avg_delta / avg_delta_x;
         y_scale = avg_delta / avg_delta_y;
         z_scale = avg_delta / avg_delta_z;
-        printf("calibration done...\n");
+        printf("-------------------------\n");
+        printf("x_bias %f\n", x_bias);
+        printf("y_bias %f\n", y_bias);
+        printf("z_bias %f\n", z_bias);
+        printf("x_scale %f\n", x_scale);
+        printf("y_scale %f\n", y_scale);
+        printf("z_scale %f\n", z_scale);
+        printf("-------------------------\n");
+
     }
 
     auto setDeclination(double d) {
