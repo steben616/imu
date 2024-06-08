@@ -1,6 +1,9 @@
 ### HMC5883L 3D magnetometer header-only library for pico c/c++ sdk;
 
-- Suported magnetometers HMC5883L(mag)
+- Suported magnetometers HMC5883L(mag), BNO055 (9dof IMU)
+- The original bosch sensortec driver for bno055 is used as is.
+- imu.h in the root folder is just a wraper over it with pico specific i2c read/write callbacks.
+- HMC5883L used NED refrense frame (x is the yaw/heading vector) while bno055 deafult is ENU (y is the yaw/heading vector)
 - Clone this repository at the same level as other examples under the pico-examples directory.
 - Edit the root CMakeLists.txt of the pico-examples repository and include this repository in the build using add_subdirectory(hmc5883l).
 - Build the examples as usual using 'cmake --build ..'

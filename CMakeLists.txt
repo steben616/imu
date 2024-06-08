@@ -1,10 +1,19 @@
-add_executable(main main.cpp)
+add_executable(
+    main
+    main.cpp
+    imu/bno055/bno055.c
+    imu/bno055/bno055_support.c
+)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(main 1)
 pico_enable_stdio_uart(main 0)
 
-target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(
+    main
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 # pull in common dependencies and additional pwm hardware support
 target_link_libraries(main pico_stdlib hardware_i2c)
