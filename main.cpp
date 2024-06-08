@@ -24,12 +24,12 @@ void run_imu() {
         u8 magStatus;
         bno055_get_mag_calib_stat(&magStatus);
         printf("calibration: system %u, gyro %u, acc %u, mag %u\n", sysStatus, gyroStatus, accStatus, magStatus);
-        bno055_accel_float_t accelData;
-        bno055_convert_float_accel_xyz_msq(&accelData);
-        printf("accel_x: %3.2f,   accel_y: %3.2f,   accel_z: %3.2f\n", accelData.x, accelData.y, accelData.z);
-        bno055_euler_float_t eulerAngles;
-        bno055_convert_float_euler_hpr_deg(&eulerAngles);
-        printf("heading: %3.2f,   pitch: %3.2f,   roll: %3.2f\n\n", eulerAngles.h, eulerAngles.p, eulerAngles.r);
+        bno055_accel_float_t accel;
+        bno055_convert_float_accel_xyz_msq(&accel);
+        printf("accel_x: %3.2f,   accel_y: %3.2f,   accel_z: %3.2f\n", accel.x, accel.y, accel.z);
+        bno055_euler_float_t euler;
+        bno055_convert_float_euler_hpr_deg(&euler);
+        printf("heading: %3.2f,   pitch: %3.2f,   roll: %3.2f\n\n", euler.h, euler.p, euler.r);
         sleep_ms(200);
     }
 }
