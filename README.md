@@ -12,3 +12,16 @@
 - Reported heading can be cross-verified using a floating magnetized needle or something equivalent.
 - The heading should vary from 0 degrees (true geographic north) all the way to 360 degrees (one full x-y plane rotation), and then wrap back to 0.
 - all mag/imu headings are pointing to magnetic north. As such, local declination needs to be accounted for.
+
+app
+```
+vcpkg install websocketpp
+cmake -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+cmake --build . --config Debug
+```
+
+three.js visualizer
+```
+npm install http-server -g
+http-server -p 1234 --cors
+```

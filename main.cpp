@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <iomanip>
+#include <iostream>
+
 #include <imu/bno055.h>
 #include <mag/hmc5883l.h>
 
@@ -23,13 +26,16 @@ void run_imu() {
         bno055_get_accel_calib_stat(&accStatus);
         u8 magStatus;
         bno055_get_mag_calib_stat(&magStatus);
-        printf("calibration: system %u, gyro %u, acc %u, mag %u\n", sysStatus, gyroStatus, accStatus, magStatus);
+        std::cout << "{\"cal_gyro\":" << unsigned(gyroStatus) << ", \"cal_acc\":" << unsigned(accStatus)
+            << ", \"cal_mag\":" << unsigned(magStatus) << ", \"cal_sys\":" << unsigned(sysStatus) << "}\n";
         bno055_accel_float_t accel;
         bno055_convert_float_accel_xyz_msq(&accel);
-        printf("accel_x: %3.2f,   accel_y: %3.2f,   accel_z: %3.2f\n", accel.x, accel.y, accel.z);
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "{\"acc_x\":" << accel.x << ", \"acc_y\":" << accel.y << ", \"acc_z\":" << accel.z << "}\n";
         bno055_euler_float_t euler;
         bno055_convert_float_euler_hpr_deg(&euler);
-        printf("heading: %3.2f,   pitch: %3.2f,   roll: %3.2f\n\n", euler.h, euler.p, euler.r);
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "{\"y\":" << euler.h << ", \"p\":" << euler.p << ", \"r\":" << euler.r << "}\n";
         sleep_ms(200);
     }
 }
