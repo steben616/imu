@@ -8,20 +8,26 @@
 - Edit the root CMakeLists.txt of the pico-examples repository and include this repository in the build using add_subdirectory(hmc5883l).
 - Build the examples as usual using 'cmake --build ..'
 - Calibrate the magnetometer first using the calibrate function.
-- Copy the resulting UF2 file onto the Pico and use PuTTY to check the heading values.
+- Copy the resulting UF2 file (main.uf2) onto the Pico and use PuTTY to check the heading values.
 - Reported heading can be cross-verified using a floating magnetized needle or something equivalent.
 - The heading should vary from 0 degrees (true geographic north) all the way to 360 degrees (one full x-y plane rotation), and then wrap back to 0.
 - all mag/imu headings are pointing to magnetic north. As such, local declination needs to be accounted for.
+- The app directory has a c++ proxy app that reads messages off pico's COM port (usb) connection and publishes them over a websocket server
+- App directory also has a three.js visualizer that maintains a websocket connection to the c++ proxy app.
+- The axis helper gets rotate around the z axis based on the yaw reported by the IMU over USB/UART.
+- There's some issue on windows with reading the com port using proxy app first.. just start putty first, close it and then launch the proxy app.
 
-app
+c++ proxy app
 ```
 vcpkg install websocketpp
 cmake -DCMAKE_TOOLCHAIN_FILE=D:/vcpkg/scripts/buildsystems/vcpkg.cmake ..
 cmake --build . --config Debug
+app.exe \\.\COM4
 ```
 
 three.js visualizer
 ```
 npm install http-server -g
 http-server -p 1234 --cors
+launch http://localhost:1234/
 ```
