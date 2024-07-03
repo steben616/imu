@@ -29,5 +29,5 @@ three.js visualizer
 ```
 npm install http-server -g
 http-server -p 1234 --cors
-launch http://localhost:1234/
+launch the visualizer url http://localhost:1234/
 ```

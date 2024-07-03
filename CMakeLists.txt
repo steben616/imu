@@ -3,6 +3,11 @@ add_executable(
     main.cpp
     imu/bno055/bno055.c
     imu/bno055/bno055_support.c
+    imu/sh2/sh2.c
+    imu/sh2/shtp.c
+    imu/sh2/euler.c
+    imu/sh2/sh2_util.c
+    imu/sh2/sh2_SensorValue.c
 )
 
 # enable usb output, disable uart output

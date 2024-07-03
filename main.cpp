@@ -3,19 +3,53 @@
 #include <iostream>
 
 #include <imu/bno055.h>
+#include <imu/bno085.h>
 #include <mag/hmc5883l.h>
 
-void run_imu();
+void run_bno055();
+void run_bno085();
 void run_hmc58883l();
 
 int main() {
     stdio_init_all();
-    sleep_ms(3000);
-    run_imu();
+    sleep_ms(5000);
+    run_bno085();
+    //run_bno055();
     //run_hmc58883l();
 }
 
-void run_imu() {
+void run_bno085() {
+    imu::bno85 imu(16, 17);
+    auto rc = imu.init_i2c_hal();
+    if (!rc) {
+        std::cout << "bno0855 initialization failed" << std::endl;
+        return;
+    }
+    sh2_SensorValue_t sensor_value;
+    // //sh2.h line 93, RM: 2.2.4 Rotation Vector
+    imu.enableReport(SH2_ROTATION_VECTOR, 10);
+    while (true) {
+        sleep_ms(100);
+        if (imu.getSensorEvent(&sensor_value)) {
+            switch (sensor_value.sensorId) {
+                case SH2_ROTATION_VECTOR:
+                    std::cout << "rotation vector  " <<
+                        "i: " << sensor_value.un.gameRotationVector.i <<
+                        "j: " << sensor_value.un.gameRotationVector.j <<
+                        "k: " << sensor_value.un.gameRotationVector.k <<
+                        "r: " << sensor_value.un.gameRotationVector.real << std::endl;
+                    break;
+            }
+        }
+        if (imu.wasReset()) {
+            std::cout << "sensor was reset" << std::endl;
+            //sh2.h line 93, RM: 2.2.4 Rotation Vector
+            imu.enableReport(SH2_ROTATION_VECTOR, 10);
+        }
+    }
+}
+
+void run_bno055() {
     imu::bno55 imu(16, 17);
     while (true) {
         u8 sysStatus;

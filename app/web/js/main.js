@@ -15,7 +15,7 @@ document.body.appendChild(renderer.domElement);
 
 const axesHelper = new THREE.AxesHelper();
 scene.add(axesHelper);
-// Three.js uses a right-handed coordinate frame, where the:
+// Three.js uses a right-handed coordinate frame, where:
 // positive x-axis(red) points to the right
 // positive y-axis(green) points up and
 // positive z-axis(blue) points towards the viewer. (not visible)
