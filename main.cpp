@@ -22,43 +22,14 @@ void run_bno085() {
     imu::bno85 imu(16, 17);
     auto rc = imu.init_i2c_hal();
     if (!rc) return;
-
-    imu.enableReport(SH2_ROTATION_VECTOR, 10);
     imu.enableReport(SH2_ACCELEROMETER, 5);
+    imu.enableReport(SH2_ROTATION_VECTOR, 10);
     imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5);
     imu.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED, 5);
-
-    // Enable dynamic calibration for A, G and M sensors
     auto status = imu.enableCalibration();
     if (status != SH2_OK) return;
-
-    sh2_SensorValue_t sensor_value;
-    u8 accStatus, gyroStatus, magStatus;
-    accStatus = gyroStatus = magStatus = 0;
     while (true) {
-        sleep_ms(100);
-        if (imu.getSensorEvent(&sensor_value)) {
-            switch (sensor_value.sensorId) {
-                case SH2_ROTATION_VECTOR:
-                    std::cout << "rotation vector" <<
-                        " i:" << sensor_value.un.rotationVector.i <<
-                        " j:" << sensor_value.un.rotationVector.j <<
-                        " k:" << sensor_value.un.rotationVector.k <<
-                        " r:" << sensor_value.un.rotationVector.real << std::endl;
-                    break;
-                case SH2_ACCELEROMETER:
-                    accStatus = (sensor_value.status & 0x03);
-                    break;
-                case SH2_GYROSCOPE_CALIBRATED:
-                    gyroStatus = (sensor_value.status & 0x03);
-                    break;
-                case SH2_MAGNETIC_FIELD_CALIBRATED:
-                    magStatus = (sensor_value.status & 0x03);
-                    break;
-            }
-        }
-        std::cout << "{\"cal_gyro\":" << unsigned(gyroStatus) << ", \"cal_acc\":"
-           << unsigned(accStatus) << ", \"cal_mag\":" << unsigned(magStatus) << "}\n";
+        sh2_service();
         if (imu.wasReset()) {
             std::cout << "sensor was reset" << std::endl;
             imu.enableCalibration();

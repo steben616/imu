@@ -10,7 +10,9 @@ namespace imu {
 
 bool reset_occurred = false;
 constexpr uint8_t BNO085_I2C_ADDR = 0x4A;
-sh2_SensorValue_t *_sensor_value = nullptr;
+sh2_SensorValue_t sensor_value;
+sh2_SensorEvent_t sensor_event;
+u8 accStatus, gyroStatus, magStatus;
 
 bool hal_reset();
 uint32_t getTimeUs(sh2_Hal_t *self);
@@ -100,17 +102,6 @@ struct bno85{
         return false;
     }
 
-    bool getSensorEvent(sh2_SensorValue_t *value) {
-        _sensor_value = value;
-        _sensor_value->timestamp = 0;
-        sh2_service();
-        if (_sensor_value->timestamp == 0 && _sensor_value->sensorId != SH2_GYRO_INTEGRATED_RV) {
-            // no new events
-            return false;
-        }
-        return true;
-    }
-
     bool wasReset(void) {
         bool x = reset_occurred;
         reset_occurred = false;
@@ -135,19 +126,45 @@ inline bool hal_reset() {
 }
 
 inline void hal_callback(void *cookie, sh2_AsyncEvent_t *pEvent) {
-    // std::cout << "hal_callback pEvent->eventId " << pEvent->eventId << std::endl;
     if (pEvent->eventId == SH2_RESET) {
         imu::reset_occurred = true;
+        std::cout << "hal_callback SH2_RESET" << std::endl;
     }
 }
 
 inline void sensorHandler(void *cookie, sh2_SensorEvent_t *event) {
-  auto rc = sh2_decodeSensorEvent(_sensor_value, event);
-  if (rc != SH2_OK) {
-    std::cout << "sh2_decodeSensorEvent failed" << std::endl;
-    _sensor_value->timestamp = 0;
-    return;
-  }
+    sensor_event = *event;
+    auto status = sh2_decodeSensorEvent(&sensor_value, &sensor_event);
+    if (status != SH2_OK) {
+        std::cout << "sh2_decodeSensorEvent failed" << std::endl;
+        return;
+    }
+    bool cal_event = false;
+    switch (sensor_event.reportId) {
+        case SH2_ROTATION_VECTOR:
+            std::cout << "rotation vector" <<
+                " i:" << sensor_value.un.rotationVector.i <<
+                " j:" << sensor_value.un.rotationVector.j <<
+                " k:" << sensor_value.un.rotationVector.k <<
+                " r:" << sensor_value.un.rotationVector.real << std::endl;
+            break;
+        case SH2_ACCELEROMETER:
+            cal_event = true;
+            accStatus = (sensor_event.report[2] & 0x03);
+            break;
+        case SH2_GYROSCOPE_CALIBRATED:
+            cal_event = true;
+            gyroStatus = (sensor_event.report[2] & 0x03);
+            break;
+        case SH2_MAGNETIC_FIELD_CALIBRATED:
+            cal_event = true;
+            magStatus = (sensor_event.report[2] & 0x03);
+            break;
+    }
+    if (cal_event) {
+        std::cout << "{\"cal_gyro\":" << unsigned(gyroStatus) << ", \"cal_acc\":"
+            << unsigned(accStatus) << ", \"cal_mag\":" << unsigned(magStatus) << "}\n";
+    }
 }
 
 inline int i2c_open(sh2_Hal_t *self) {
