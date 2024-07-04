@@ -70,7 +70,14 @@ struct bno85{
             std::cout << "Build: " << _prodIds.entry[n].swBuildNumber << std::endl;
         }
         sh2_setSensorCallback(sensorHandler, NULL);
+        std::cout << "bno0855 initialization successful" << std::endl;
         return true;
+    }
+
+    int enableCalibration() {
+        auto status = sh2_setCalConfig(SH2_CAL_ACCEL|SH2_CAL_GYRO|SH2_CAL_MAG);
+        std::cout << "sh2_getCalConfig " << status << std::endl;
+        return status;
     }
 
     bool enableReport(sh2_SensorId_t sensorId, float frequency) {
