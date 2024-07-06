@@ -157,13 +157,15 @@ inline void sensorHandler(void *cookie, sh2_SensorEvent_t *event) {
     }
     bool cal_event = false;
     switch (sensor_event.reportId) {
+        // The absolute rotation vector provides an orientation output that is
+        // expressed as a quaternion referenced to magnetic north and gravity
+        // game rotation vector output aligns the quaternion output to an arbitrary orientation
         case SH2_ROTATION_VECTOR:
-            std::cout << "rv: {" <<
+            std::cout << "{" <<
                 "\"i\":" << sensor_value.un.rotationVector.i << ", " <<
                 "\"j\":" << sensor_value.un.rotationVector.j << ", " <<
                 "\"k\":" << sensor_value.un.rotationVector.k << ", " <<
-                "\"r\":" << sensor_value.un.rotationVector.real <<
-                "}" << std::endl;
+                "\"r\":" << sensor_value.un.rotationVector.real << "}\n";
             break;
         case SH2_ACCELEROMETER:
             cal_event = true;
@@ -179,8 +181,10 @@ inline void sensorHandler(void *cookie, sh2_SensorEvent_t *event) {
             break;
     }
     if (cal_event) {
-        std::cout << "{\"cal_gyro\":" << unsigned(gyroStatus) << ", \"cal_acc\":"
-            << unsigned(accStatus) << ", \"cal_mag\":" << unsigned(magStatus) << "}" << std::endl;
+        // std::cout << "{" <<
+        //     "\"cal_gyro\":" << unsigned(gyroStatus) << ", " <<
+        //     "\"cal_acc\":" << unsigned(accStatus) << ", " <<
+        //     "\"cal_mag\":" << unsigned(magStatus) << "}\n";
     }
 }
 

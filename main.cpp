@@ -27,7 +27,7 @@ void run_bno085() {
     rc = imu.enableCalibration();
     if (!rc) return;
     while (true) {
-        sleep_ms(250);
+        sleep_ms(100);
         sh2_service();
         if (imu.hasReset()) {
             imu.enableCalibration();
