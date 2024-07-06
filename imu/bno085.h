@@ -38,9 +38,6 @@ struct bno85{
     }
 
     bool init_i2c_hal() {
-        // read a single byte to determine if connected
-        // this could cause a full report to generate that would have to be flushed
-        // but that doesnt matter as this is followed with a hardware reset
         uint8_t dummy;
         auto rc = i2c_read_blocking(i2c0, BNO085_I2C_ADDR, &dummy, 1, false);
         if(rc < 1){
@@ -71,40 +68,58 @@ struct bno85{
                 _prodIds.entry[n].swVersionMinor << "." << _prodIds.entry[n].swVersionPatch << std::endl;
             std::cout << "Build: " << _prodIds.entry[n].swBuildNumber << std::endl;
         }
-        sh2_setSensorCallback(sensorHandler, NULL);
-        std::cout << "bno0855 initialization successful" << std::endl;
+        status = sh2_setSensorCallback(sensorHandler, NULL);
+        if (status != SH2_OK) {
+            std::cout << "sh2_setSensorCallback failed" << std::endl;
+            return false;
+        }
         return true;
     }
 
-    int enableCalibration() {
+    bool enableCalibration() {
         auto status = sh2_setCalConfig(SH2_CAL_ACCEL|SH2_CAL_GYRO|SH2_CAL_MAG);
-        std::cout << "sh2_getCalConfig " << status << std::endl;
-        return status;
+        std::cout << "sh2_setCalConfig " << status << std::endl;
+        return (status == SH2_OK);
+    }
+
+    bool enableReports() {
+        if (!enableReport(SH2_ACCELEROMETER, 5)) {
+            return false;
+        }
+        if (!enableReport(SH2_ROTATION_VECTOR, 10)) {
+            return false;
+        }
+        if (!enableReport(SH2_GYROSCOPE_CALIBRATED, 5)) {
+            return false;
+        }
+        if (!enableReport(SH2_MAGNETIC_FIELD_CALIBRATED, 5)) {
+            return false;
+        }
+        return true;
     }
 
     bool enableReport(sh2_SensorId_t sensorId, float frequency) {
         uint32_t interval_us = (uint32_t)(1000000 / frequency);
         static sh2_SensorConfig_t config;
-        // These sensor options are disabled or not used in most cases
-        config.changeSensitivityEnabled = false;
-        config.wakeupEnabled = false;
-        config.changeSensitivityRelative = false;
-        config.alwaysOnEnabled = false;
-        config.changeSensitivity = 0;
-        config.batchInterval_us = 0;
         config.sensorSpecific = 0;
+        config.batchInterval_us = 0;
+        config.wakeupEnabled = false;
+        config.changeSensitivity = 0;
+        config.alwaysOnEnabled = false;
         config.reportInterval_us = interval_us;
-        int status = sh2_setSensorConfig(sensorId, &config);
-        if (status == SH2_OK) {
-            std::cout << "sh2_setSensorConfig successful" << std::endl;
-            return true;
+        config.changeSensitivityEnabled = false;
+        config.changeSensitivityRelative = false;
+        auto status = sh2_setSensorConfig(sensorId, &config);
+        if (status != SH2_OK) {
+            std::cout << "sh2_setSensorConfig failed " << sensorId << std::endl;
         }
-        return false;
+        return (status == SH2_OK);
     }
 
-    bool wasReset(void) {
+    bool hasReset(void) {
         bool x = reset_occurred;
         reset_occurred = false;
+        if (x) std::cout << "imu was reset" << std::endl;
         return x;
     }
 };
@@ -115,16 +130,17 @@ inline bool hal_reset() {
     for (int i = 0; i < 5; i++) {
         auto rc = i2c_write_blocking(i2c0, BNO085_I2C_ADDR, soft_reset_pkt, 5, false);
         if (rc == 5) {
-            std::cout << "hal software reset successful" << std::endl;
             return true;
         } else {
-            std::cout << "hal software reset failed: " << rc << std::endl;
-            return false;
+            std::cout << "hal software reset failed " << rc << std::endl;
+            sleep_ms(50);
         }
     }
+    sleep_ms(300);
     return false;
 }
 
+// callback for reset events and other non-sensor events received from SH-2 sensor hub
 inline void hal_callback(void *cookie, sh2_AsyncEvent_t *pEvent) {
     if (pEvent->eventId == SH2_RESET) {
         imu::reset_occurred = true;
@@ -142,11 +158,12 @@ inline void sensorHandler(void *cookie, sh2_SensorEvent_t *event) {
     bool cal_event = false;
     switch (sensor_event.reportId) {
         case SH2_ROTATION_VECTOR:
-            std::cout << "rotation vector" <<
-                " i:" << sensor_value.un.rotationVector.i <<
-                " j:" << sensor_value.un.rotationVector.j <<
-                " k:" << sensor_value.un.rotationVector.k <<
-                " r:" << sensor_value.un.rotationVector.real << std::endl;
+            std::cout << "rv: {" <<
+                "\"i\":" << sensor_value.un.rotationVector.i << ", " <<
+                "\"j\":" << sensor_value.un.rotationVector.j << ", " <<
+                "\"k\":" << sensor_value.un.rotationVector.k << ", " <<
+                "\"r\":" << sensor_value.un.rotationVector.real <<
+                "}" << std::endl;
             break;
         case SH2_ACCELEROMETER:
             cal_event = true;
@@ -163,7 +180,7 @@ inline void sensorHandler(void *cookie, sh2_SensorEvent_t *event) {
     }
     if (cal_event) {
         std::cout << "{\"cal_gyro\":" << unsigned(gyroStatus) << ", \"cal_acc\":"
-            << unsigned(accStatus) << ", \"cal_mag\":" << unsigned(magStatus) << "}\n";
+            << unsigned(accStatus) << ", \"cal_mag\":" << unsigned(magStatus) << "}" << std::endl;
     }
 }
 
@@ -192,7 +209,6 @@ inline int i2c_read(sh2_Hal_t *self, uint8_t *buffer, unsigned len, uint32_t *t_
     // DEBUG_PRINT("shtp_header 2 : 0x%02x, 0b%08b\r\n", shtp_header[2], shtp_header[2]);
     // DEBUG_PRINT("shtp_header 3 : 0x%02x, 0b%08b\r\n", shtp_header[3], shtp_header[3]);
     // DEBUG_PRINT("length %d\r\n", length);
-
     if(length > len){
         std::cout << "i2c_read shtp_header length " << length << ", len " << len << std::endl;
         return 0;

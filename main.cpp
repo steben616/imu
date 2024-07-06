@@ -22,21 +22,16 @@ void run_bno085() {
     imu::bno85 imu(16, 17);
     auto rc = imu.init_i2c_hal();
     if (!rc) return;
-    imu.enableReport(SH2_ACCELEROMETER, 5);
-    imu.enableReport(SH2_ROTATION_VECTOR, 10);
-    imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5);
-    imu.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED, 5);
-    auto status = imu.enableCalibration();
-    if (status != SH2_OK) return;
+    rc = imu.enableReports();
+    if (!rc) return;
+    rc = imu.enableCalibration();
+    if (!rc) return;
     while (true) {
+        sleep_ms(250);
         sh2_service();
-        if (imu.wasReset()) {
-            std::cout << "sensor was reset" << std::endl;
+        if (imu.hasReset()) {
             imu.enableCalibration();
-            imu.enableReport(SH2_ROTATION_VECTOR, 10);
-            imu.enableReport(SH2_ACCELEROMETER, 5);
-            imu.enableReport(SH2_GYROSCOPE_CALIBRATED, 5);
-            imu.enableReport(SH2_MAGNETIC_FIELD_CALIBRATED, 5);
+            imu.enableReports();
         }
     }
 }
