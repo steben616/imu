@@ -34,7 +34,7 @@ root.applyMatrix4(XZYMatrix);
 scene.add(root);
 
 // grid
-const grid = new THREE.GridHelper(10, 10, 0xFFFFFF, 0x000000)
+const grid = new THREE.GridHelper(10, 10, 0x000000, 0x000000)
 grid.rotation.x = Math.PI / 2
 root.add(grid);
 
@@ -43,35 +43,35 @@ const axesHelper = new THREE.AxesHelper(3);
 root.add(axesHelper);
 
 // cylinder
-// const geometry = new THREE.CylinderGeometry(0.01, 0.10, 3, 32, 1, true);
-// const material = new THREE.MeshNormalMaterial();
-// const cylinder = new THREE.Mesh(geometry, material);
-// root.add(cylinder);
+const geometry = new THREE.CylinderGeometry(0.01, 0.10, 3, 32, 1, true);
+const material = new THREE.MeshNormalMaterial();
+const cylinder = new THREE.Mesh(geometry, material);
+root.add(cylinder);
 
 // missile
-let missile;
-new MTLLoader()
-    .setPath('models/missile/')
-    .load('dummy.mtl', function(materials) {
-        materials.preload();
-        new OBJLoader()
-            .setMaterials(materials)
-            .setPath('models/missile/')
-            .load('missile.obj', function(object) {
-                object.scale.setScalar(0.30);
-                var texture = new THREE.TextureLoader().load('models/missile/texture.png');
-                object.traverse(function (child) {
-                    if (child instanceof THREE.Mesh) {
-                        child.material.map = texture;
-                    }
-                });
-                root.add(object);
-                object.rotation.x = 0;
-                object.rotation.y = 0;
-                object.rotation.z = 0; //-1 * (Math.PI / 2);
-                missile = object;
-            });
-    });
+// let missile;
+// new MTLLoader()
+//     .setPath('models/missile/')
+//     .load('dummy.mtl', function(materials) {
+//         materials.preload();
+//         new OBJLoader()
+//             .setMaterials(materials)
+//             .setPath('models/missile/')
+//             .load('missile.obj', function(object) {
+//                 object.scale.setScalar(0.30);
+//                 var texture = new THREE.TextureLoader().load('models/missile/texture.png');
+//                 object.traverse(function (child) {
+//                     if (child instanceof THREE.Mesh) {
+//                         child.material.map = texture;
+//                     }
+//                 });
+//                 object.rotation.x = 0;
+//                 object.rotation.y = 0;
+//                 object.rotation.z = -1 * (Math.PI);
+//                 root.add(object);
+//                 missile = object;
+//             });
+//     });
 camera.position.x = 6;
 camera.position.y = 6;
 camera.position.z = 6;
@@ -90,7 +90,7 @@ function wsConnect() {
         //console.log(e.data);
         let rq = JSON.parse(e.data)
         let quaternion = new THREE.Quaternion(rq.i, rq.j, rq.k, rq.r).normalize();
-        missile.rotation.setFromQuaternion(quaternion, 'XYZ');
+        cylinder.rotation.setFromQuaternion(quaternion, 'XYZ');
     }
     ws.onopen = function(e) {
         console.log("onopen");
