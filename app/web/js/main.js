@@ -23,14 +23,11 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
+// rotate the root group such that
+// x and y are planar and z is up
 const root = new THREE.Group();
-const XZYMatrix = new THREE.Matrix4().set(
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    1, 0, 0, 0,
-    0, 0, 0, 1
-);
-root.applyMatrix4(XZYMatrix);
+root.rotation.x = -1 * (Math.PI / 2);
+root.rotation.z = (Math.PI );
 scene.add(root);
 
 // grid
@@ -41,12 +38,6 @@ root.add(grid);
 // axes
 const axesHelper = new THREE.AxesHelper(3);
 root.add(axesHelper);
-
-// cylinder
-// const geometry = new THREE.CylinderGeometry(0.01, 0.10, 3, 32, 1, true);
-// const material = new THREE.MeshNormalMaterial();
-// const cylinder = new THREE.Mesh(geometry, material);
-// root.add(cylinder);
 
 // missile
 let missile;
@@ -65,9 +56,6 @@ new MTLLoader()
                         child.material.map = texture;
                     }
                 });
-                object.rotation.x = 0;
-                object.rotation.y = 0;
-                object.rotation.z = -1 * (Math.PI);
                 root.add(object);
                 missile = object;
             });
@@ -89,7 +77,9 @@ function wsConnect() {
     ws.onmessage = function(e) {
         //console.log(e.data);
         let rq = JSON.parse(e.data)
-        let quaternion = new THREE.Quaternion(rq.i, rq.j, rq.k, rq.r).normalize();
+        let quaternion = new THREE.Quaternion(rq.i, rq.j, rq.k, rq.r).normalize()
+        // multiply by the default mapping quaternion
+        quaternion.multiply(new THREE.Quaternion(0, 0, Math.sqrt(2)/2,  -1 * Math.sqrt(2)/2).normalize());
         missile.rotation.setFromQuaternion(quaternion, 'XYZ');
     }
     ws.onopen = function(e) {
