@@ -1,4 +1,4 @@
-### HMC5883L 3D magnetometer header-only library for pico c/c++ sdk
+### HMC5883L/BNO055/BNO085 header-only library for pico c/c++ sdk
 
 - Suported magnetometers HMC5883L(mag), BNO055 (9dof IMU), BNO085 (fused absolute rotation quaternion)
 - The original bosch sensortec driver for bno055 is used as is (under imu/bno055 folder)
@@ -16,7 +16,7 @@
 - The app directory has a c++ proxy app that reads messages off pico's COM port (usb) connection and publishes them over a websocket server
 - App directory also has a three.js visualizer that maintains a websocket connection to the c++ proxy app.
 - The axis helper gets rotate around the z axis based on the yaw reported by the IMU over USB/UART.
-- There's some issue on windows with reading the com port using proxy app first.. just start putty first, close it and then launch the proxy app.
+- There's some issue on windows with reading the com port directly using the proxy app.. just start putty first, close it and then launch the proxy app.
 
 c++ proxy app
 ```

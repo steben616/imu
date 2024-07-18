@@ -77,10 +77,26 @@ function wsConnect() {
     ws.onmessage = function(e) {
         //console.log(e.data);
         let rq = JSON.parse(e.data)
-        let quaternion = new THREE.Quaternion(rq.i, rq.j, rq.k, rq.r).normalize()
-        // multiply by the default mapping quaternion
-        quaternion.multiply(new THREE.Quaternion(0, 0, Math.sqrt(2)/2,  -1 * Math.sqrt(2)/2).normalize());
-        missile.rotation.setFromQuaternion(quaternion, 'XYZ');
+        if (rq.hasOwnProperty('i')) {
+            // i j k quaternion; bno085
+            let quaternion = new THREE.Quaternion(rq.i, rq.j, rq.k, rq.r).normalize()
+            // multiply by the default mapping quaternion
+            quaternion.multiply(new THREE.Quaternion(0, 0, Math.sqrt(2)/2,  -1 * Math.sqrt(2)/2).normalize());
+            missile.rotation.setFromQuaternion(quaternion, 'XYZ');
+        } else if (rq.hasOwnProperty('y')) {
+            // y p r euler; bno055
+            let e = new THREE.Euler(
+                THREE.MathUtils.degToRad(rq.r),
+                THREE.MathUtils.degToRad(rq.p),
+                THREE.MathUtils.degToRad(rq.y),
+                'XYZ')
+            let quaternion = new THREE.Quaternion();
+            quaternion.setFromEuler(e).normalize();
+            missile.rotation.setFromQuaternion(quaternion, 'XYZ');
+        } else if (rq.hasOwnProperty('cal_gyro')) {
+            // system calibration status
+            console.log(rq.cal_gyro, rq.cal_acc, rq.cal_mag);
+        }
     }
     ws.onopen = function(e) {
         console.log("onopen");
