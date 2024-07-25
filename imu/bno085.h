@@ -1,6 +1,8 @@
 #ifndef BNO85_H
 #define BNO85_H
 
+#include <iostream>
+
 extern "C" {
     #include <imu/sh2/sh2_err.h>
     #include <imu/sh2/sh2_SensorValue.h>

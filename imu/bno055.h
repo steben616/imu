@@ -2,6 +2,7 @@
 #define BNO55_H
 
 #include <cstring>
+#include <iostream>
 
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
@@ -17,7 +18,7 @@ void pico_delay_ms(u32 msec);
 int8_t pico_i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
 int8_t pico_i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len);
 
-struct bno55{
+struct bno55 {
 
     struct bno055_t bno;
 
@@ -38,11 +39,11 @@ struct bno55{
             sleep_ms(100);
             failed = bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF);
             if (failed) {
-                printf("bno055_set_operation_mode failed\n");
+                std::cout << "bno055_set_operation_mode failed" << std::endl;
             }
             sleep_ms(100);
         } else {
-            printf("bno055_set_power_mode failed\n");
+            std::cout << "bno055_set_power_mode failed" << std::endl;
         }
     }
 };

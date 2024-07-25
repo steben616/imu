@@ -50,11 +50,11 @@ void run_bno055() {
         std::cout << "{\"cal_gyro\":" << unsigned(gyroStatus) << ", \"cal_acc\":" << unsigned(accStatus)
             << ", \"cal_mag\":" << unsigned(magStatus) << ", \"cal_sys\":" << unsigned(sysStatus) << "}\n";
         // accl
-        bno055_accel_float_t accel;
-        bno055_convert_float_accel_xyz_msq(&accel);
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << "{\"acc_x\":" << accel.x << ", \"acc_y\":" << accel.y << ", \"acc_z\":" << accel.z << "}\n";
-        // euler
+        //bno055_accel_float_t accel;
+        //bno055_convert_float_accel_xyz_msq(&accel);
+        //std::cout << std::fixed << std::setprecision(2);
+        //std::cout << "{\"acc_x\":" << accel.x << ", \"acc_y\":" << accel.y << ", \"acc_z\":" << accel.z << "}\n";
+        //euler
         bno055_euler_float_t euler;
         bno055_convert_float_euler_hpr_deg(&euler);
         std::cout << std::fixed << std::setprecision(2);
