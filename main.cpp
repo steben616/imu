@@ -39,28 +39,19 @@ void run_bno085() {
 void run_bno055() {
     imu::bno55 imu(16, 17);
     while (true) {
-        u8 sysStatus;
-        bno055_get_sys_calib_stat(&sysStatus);
-        u8 gyroStatus;
-        bno055_get_gyro_calib_stat(&gyroStatus);
-        u8 accStatus;
-        bno055_get_accel_calib_stat(&accStatus);
-        u8 magStatus;
-        bno055_get_mag_calib_stat(&magStatus);
-        std::cout << "{\"cal_gyro\":" << unsigned(gyroStatus) << ", \"cal_acc\":" << unsigned(accStatus)
-            << ", \"cal_mag\":" << unsigned(magStatus) << ", \"cal_sys\":" << unsigned(sysStatus) << "}\n";
+        // calibration
+        auto [gyro, accl, mag, sys] = imu.getCalibrationStatus();
+        std::cout << "{\"cal_gyro\":" << unsigned(gyro) << ", \"cal_acc\":" << unsigned(accl)
+            << ", \"cal_mag\":" << unsigned(mag) << ", \"cal_sys\":" << unsigned(sys) << "}\n";
         // accl
         //bno055_accel_float_t accel;
         //bno055_convert_float_accel_xyz_msq(&accel);
         //std::cout << std::fixed << std::setprecision(2);
         //std::cout << "{\"acc_x\":" << accel.x << ", \"acc_y\":" << accel.y << ", \"acc_z\":" << accel.z << "}\n";
         //euler
-        bno055_euler_float_t euler;
-        bno055_convert_float_euler_hpr_deg(&euler);
+        auto [h, p, r] = imu.getEulerAngles();
         std::cout << std::fixed << std::setprecision(2);
-        std::cout << "{\"y\":" << euler.h << ", \"p\":" << euler.p << ", \"r\":" << euler.r << "}\n";
-        // quaternion
-        //bno055_read_quaternion_wxyz();
+        std::cout << "{\"y\":" << h << ", \"p\":" << p << ", \"r\":" << r << "}\n";
         sleep_ms(100);
     }
 }

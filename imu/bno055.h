@@ -46,6 +46,30 @@ struct bno55 {
             std::cout << "bno055_set_power_mode failed" << std::endl;
         }
     }
+
+    auto getEulerAngles() {
+        bno055_euler_float_t euler;
+        bno055_convert_float_euler_hpr_deg(&euler);
+        return std::make_tuple(euler.h, euler.p, euler.r);
+    }
+
+    auto getQuaternion() {
+        // quaternion
+        // bno055_read_quaternion_wxyz();
+        return 0.0;
+    }
+
+    auto getCalibrationStatus() {
+        u8 sys;
+        bno055_get_sys_calib_stat(&sys);
+        u8 gyro;
+        bno055_get_gyro_calib_stat(&gyro);
+        u8 accl;
+        bno055_get_accel_calib_stat(&accl);
+        u8 mag;
+        bno055_get_mag_calib_stat(&mag);
+        return std::make_tuple(gyro, accl, mag, sys);
+    }
 };
 
 inline int8_t pico_i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t len) {
