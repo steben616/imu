@@ -13,8 +13,8 @@ void run_hmc58883l();
 int main() {
     stdio_init_all();
     sleep_ms(5000);
-    run_bno085();
-    //run_bno055();
+    //run_bno085();
+    run_bno055();
     //run_hmc58883l();
 }
 
